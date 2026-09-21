@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sarcasm Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page wide">
+    <header class="masthead">
+      <div class="masthead-top">
+        <div>
+          <p class="kicker">News headlines · six models</p>
+          <h1>Sarcasm Detection</h1>
+        </div>
+        <nav class="site-nav">
+          <a href="#analyze">Analyze</a>
+          <a href="#models">Models</a>
+          <a href="#compare">Compare</a>
+          <a href="#performance">Performance</a>
+        </nav>
+      </div>
+    </header>
+
+    <section id="models" class="panel">
+      <h2>Choose detection model</h2>
+      <div class="card-grid" id="model-grid">
+        {% for model in models %}
+        <article class="model-card" data-model-id="{{ model.id }}" data-family="{{ model.family }}">
+          <div class="card-head">
+            <div>
+              <h3>{{ model.name }}</h3>
+              <p>{{ model.architecture }}</p>
+            </div>
+            <span class="selected-mark" hidden>✓</span>
+          </div>
+          <dl>
+            <div><dt>Accuracy</dt><dd>{% if model.accuracy is not none %}{{ "%.2f"|format(model.accuracy * 100) }}%{% else %}—{% endif %}</dd></div>
+            <div><dt>Parameters</dt><dd>{% if model.parameters %}{{ "{:,}".format(model.parameters) }}{% else %}—{% endif %}</dd></div>
+          </dl>
+          <button type="button" class="use-model">Use model</button>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="analyze" class="analyze-grid">
+      <form id="predict-form" class="desk panel">
+        <h2>Enter text to analyze</h2>
+        <label for="headline">Headline</label>
+        <textarea id="headline" name="headline" rows="6" required placeholder="e.g. area man does most of his traveling by gurney"></textarea>
+        <p class="char-row"><span id="char-count">0 characters</span><span>English text recommended</span></p>
+
+        <details class="optional" id="context-fields">
+          <summary>Optional context (author, section, description)</summary>
+          <p class="hint">Used only by RoBERTa. This checkpoint was trained on headlines only, so these fields will not change the score unless you retrain with context.</p>
+          <label for="author">Author</label>
+          <input id="author" name="author" type="text" placeholder="unknown">
+          <label for="section">Section</label>
+          <input id="section" name="section" type="text" placeholder="Politics, Local, Entertainment…">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="3" placeholder="Short article summary"></textarea>
+        </details>
+
+        <div class="examples">
+          <p>Try an example</p>
+          <button type="button" class="chip" data-headline="area man does most of his traveling by gurney">Onion-style</button>
+          <button type="button" class="chip" data-headline="stock analysts confused, frightened by boar market">Pun headline</button>
+          <button type="button" class="chip" data-headline="obama visits arlington national cemetery to honor veterans">Straight news</button>
+          <button type="button" class="chip" data-headline="scientists discover new species in amazon rainforest">Rainforest</button>
+        </div>
+
+        <div class="action-row">
+          <button type="button" class="chip" id="clear-btn">Clear</button>
+          <button type="submit" class="run" id="run-btn">Check headline</button>
+        </div>
+      </form>
+
+      <section id="result" class="result panel">
+        <p class="result-kicker">Result</p>
+        <h2 id="verdict">Waiting</h2>
+        <p id="probability" class="probability">Enter a headline and run detection.</p>
+        <div class="meter" aria-hidden="true">
+          <div id="meter-fill" class="meter-fill"></div>
+        </div>
+        <p class="meter-labels"><span>Straight news</span><span>Sarcastic</span></p>
+        <dl class="result-meta">
+          <div><dt>Selected model</dt><dd id="result-model">—</dd></div>
+          <div><dt>Tokenizer</dt><dd id="result-tokenizer">—</dd></div>
+        </dl>
+        <p id="result-blurb" class="hint">The selected model’s sarcasm probability is shown above. It is not a calibrated confidence score.</p>
+        <pre id="input-preview" class="preview" hidden></pre>
+      </section>
+    </section>
+
+    <p id="error" class="error" hidden></p>
+
+    <section id="compare" class="panel">
+      <div class="section-head">
+        <div>
+          <h2>Compare models</h2>
+          <p class="hint">Run the same headline through several models. Results are shown side by side and are not ranked.</p>
+        </div>
+        <button type="button" class="run" id="compare-btn">Run comparison</button>
+      </div>
+      <div class="compare-chips" id="compare-chips">
+        {% for model in models %}
+        <button type="button" class="chip compare-chip" data-model-id="{{ model.id }}">{{ model.name }}</button>
+        {% endfor %}
+      </div>
+      <table class="plain-table">
+        <thead>
+          <tr><th>Model</th><th>Prediction</th><th>Probability</th></tr>
+        </thead>
+        <tbody id="compare-body">
+          <tr><td colspan="3">Comparison results will appear here after you run the selected models.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="performance" class="panel">
+      <h2>Model performance</h2>
+      <table class="plain-table">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Architecture</th>
+            <th>Accuracy</th>
+            <th>Validation accuracy</th>
+            <th>Parameters</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for model in models %}
+          <tr>
+            <td>{{ model.name }}</td>
+            <td>{{ model.architecture }}</td>
+            <td>{% if model.accuracy is not none %}{{ "%.2f"|format(model.accuracy * 100) }}%{% else %}—{% endif %}</td>
+            <td>{% if (model.validation_accuracy if model.validation_accuracy is not none else model.accuracy) is not none %}{{ "%.2f"|format((model.validation_accuracy if model.validation_accuracy is not none else model.accuracy) * 100) }}%{% else %}—{% endif %}</td>
+            <td>{% if model.parameters %}{{ "{:,}".format(model.parameters) }}{% else %}—{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+  <script>
+    window.HEADLINE_DESK = {
+      defaultModel: {{ default_model|tojson }},
+      models: {{ models|tojson }}
+    };
+  </script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

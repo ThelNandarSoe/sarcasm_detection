@@ -1,0 +1,95 @@
+{
+  "dataset_name": "Sarcasm_Headlines_Dataset.json",
+  "n_rows": 26709,
+  "columns": [
+    "article_link",
+    "headline",
+    "is_sarcastic",
+    "source_family",
+    "source_domain"
+  ],
+  "label_counts": {
+    "0": 14985,
+    "1": 11724
+  },
+  "label_proportions": {
+    "0": 0.561,
+    "1": 0.439
+  },
+  "missing_values": {
+    "article_link": 0,
+    "headline": 0,
+    "is_sarcastic": 0,
+    "source_family": 0,
+    "source_domain": 0
+  },
+  "empty_strings": {
+    "article_link": 0,
+    "headline": 0,
+    "source_family": 0,
+    "source_domain": 0
+  },
+  "duplicate_headlines": 107,
+  "duplicate_article_links": 1,
+  "exact_duplicate_rows": 1,
+  "unique_headline_link_pairs": 26708,
+  "duplicate_headlines_with_conflicting_labels": 0,
+  "wrapped_huffpost_urls": 582,
+  "source_family_counts": {
+    "huffpost": 14984,
+    "onion": 11725
+  },
+  "source_family_by_label": {
+    "huffpost": {
+      "0": 14984
+    },
+    "onion": {
+      "1": 11724,
+      "0": 1
+    }
+  },
+  "top_domains": {
+    "www.huffingtonpost.com": 14403,
+    "www.theonion.com": 5811,
+    "local.theonion.com": 2852,
+    "politics.theonion.com": 1767,
+    "entertainment.theonion.com": 1194,
+    "www.huffingtonpost.comhttp:": 503,
+    "sports.theonion.com": 100,
+    "www.huffingtonpost.comhttps:": 79
+  },
+  "headline_word_length": {
+    "min": 2,
+    "max": 39,
+    "mean": 9.85
+  },
+  "headline_char_length": {
+    "min": 7,
+    "max": 254,
+    "mean": 60.91
+  },
+  "n_rows_after_exact_dedup": 26708,
+  "n_dropped_exact_duplicates": 1,
+  "processed_columns": [
+    "article_link",
+    "headline",
+    "is_sarcastic",
+    "article_link_original",
+    "author",
+    "section",
+    "description",
+    "source_family",
+    "source_family_original",
+    "source_domain"
+  ],
+  "notes": [
+    "Primary file is Sarcasm_Headlines_Dataset.json (26,709 rows), matching paper Table 1.",
+    "Author, section, and description are filled with 'unknown' until scraping.",
+    "source_family and source_domain are analysis-only and must not be model inputs by default.",
+    "Onion vs HuffPost is almost perfectly correlated with is_sarcastic."
+  ],
+  "figures": {
+    "class_distribution": "C:\\Users\\DELL\\Downloads\\sarc\\results\\class_distribution.png",
+    "source_label_leakage": "C:\\Users\\DELL\\Downloads\\sarc\\results\\source_label_leakage.png"
+  }
+}
